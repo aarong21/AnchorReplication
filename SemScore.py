@@ -1,190 +1,123 @@
-from transformers import AutoTokenizer, AutoModel
-from accelerate import Accelerator
-from accelerate.utils import gather_object
-from tqdm import tqdm
-import torch, gc
+import os
+import torch
 import torch.nn as nn
+import torch.nn.functional as F
+from transformers import AutoTokenizer, AutoModel, BertTokenizer, BertModel
+from sentence_transformers import SentenceTransformer
 
-class EmbeddingModelWrapper():
-    # DEFAULT_MODEL="sentence-transformers/gtr-t5-large"
-    DEFAULT_MODEL="sentence-transformers/all-mpnet-base-v2"
-    # Higher accuracy: gtr-t5-large
-    #                   multi-qa-mpnet-base-dot-v1
-    # Best all-around balanced: all-mpnet-base-v2
-    
+# Disable parallelism in tokenizers to prevent conflicts
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-    def __init__(self, model_path=None, bs=8):
-        if model_path is None: model_path = self.DEFAULT_MODEL
-        self.model, self.tokenizer = self.load_model(model_path)
-        self.bs = bs
+# Embedding Model Wrapper using HuggingFace models
+class EmbeddingModelWrapper:
+    DEFAULT_MODEL = "sentence-transformers/all-mpnet-base-v2"
+
+    def __init__(self, model_path=None):
+        self.model_path = model_path or self.DEFAULT_MODEL
+        self.model = AutoModel.from_pretrained(self.model_path)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        self.model.eval()
         self.cos = nn.CosineSimilarity(dim=1, eps=1e-6)
 
-    def load_model(self, model_path):
-        model = AutoModel.from_pretrained(
-            model_path,
-        )#.cuda()
-        model.eval()
-        tokenizer = AutoTokenizer.from_pretrained(
-             model_path,
-        )
-        return model, tokenizer
-
     def emb_mean_pooling(self, model_output, attention_mask):
-        token_embeddings = model_output[0] 
+        # Perform mean pooling on the token embeddings
+        token_embeddings = model_output.last_hidden_state
         input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-        return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+        sum_embeddings = torch.sum(token_embeddings * input_mask_expanded, dim=1)
+        sum_mask = torch.clamp(input_mask_expanded.sum(dim=1), min=1e-9)
+        return sum_embeddings / sum_mask
 
     def get_embeddings(self, sentences):
-        embeddings=torch.tensor([],device="cpu")
-        
-        if self.bs is None:
-            batches=[sentences]
-        else:
-            batches = [sentences[i:i + self.bs] for i in range(0, len(sentences), self.bs)]  
-            
-        for sentences in batches:
-            encoded_input = self.tokenizer(sentences, padding=True, truncation=True, return_tensors='pt').to("cpu")
-            with torch.no_grad():
-                model_output = self.model(**encoded_input)        
-            batch_embeddings=self.emb_mean_pooling(model_output, encoded_input['attention_mask'])
-            
-            embeddings=torch.cat( (embeddings, batch_embeddings), dim=0 )
-
+        # Get embeddings for a list of sentences
+        encoded_input = self.tokenizer(
+            sentences,
+            padding=True,
+            truncation=True,
+            return_tensors='pt'
+        )
+        with torch.no_grad():
+            model_output = self.model(**encoded_input)
+        embeddings = self.emb_mean_pooling(model_output, encoded_input['attention_mask'])
         return embeddings
 
-    def get_similarities(self, x, y=None):
-        if y is None:
-            num_samples=x.shape[0]
-            similarities = [[0 for i in range(num_samples)] for f in range(num_samples)]
-            for row in tqdm(range(num_samples)):
-                similarities[row][0:row+1]=em.cos(x[row].repeat(row+1,1), x[0:row+1]).tolist()
-            return similarities
-        else:            
-            return self.cos(x,y).tolist()
+    def get_similarity(self, embedding1, embedding2):
+        # Compute cosine similarity between two embeddings
+        return self.cos(embedding1.unsqueeze(0), embedding2.unsqueeze(0)).item()
 
-class ModelPredictionGenerator:
-    def __init__(self, model, tokenizer, eval_dataset, use_accelerate=False, bs=8, generation_config=None):
-        self.model=model
-        self.tokenizer=tokenizer
-        self.bs=bs
-        self.eval_prompts=self.messages_to_prompts( eval_dataset )
-        self.use_accelerate=use_accelerate
-        self.accelerator = Accelerator()
-
-        assert tokenizer.eos_token_id is not None
-        assert tokenizer.chat_template is not None
-        if tokenizer.pad_token_id is None:
-            tokenizer.pad_token_id = tokenizer.eos_token_id
-
-        # llama-precise
-        if generation_config is None:            
-            self.generation_config = {
-                "temperature": 0.7,
-                "top_p": 0.1,
-                "repetition_penalty": 1.18,
-                "top_k": 40,
-                "do_sample": True,
-                "max_new_tokens": 100,
-                "pad_token_id": tokenizer.pad_token_id
-            }
-        else:
-            self.generation_config = generation_config
-
-    def clear_cache(self):
-        torch.cuda.empty_cache()
-        gc.collect()
-
-    def messages_to_prompts(self, ds):
-        prompts=[]
-        for conversation in ds["messages"]:
-            for i,msg in enumerate(conversation):
-                if msg["role"]=="user":
-                    prompts.append(
-                        dict (
-                            # prompt: format current messages up to the current user message and add a generation prompt
-                            prompt=self.tokenizer.apply_chat_template(conversation[:i+1], add_generation_prompt=True, tokenize=False),
-                            answer_ref=conversation[i+1]["content"]
-                        )
-                    )
-        return prompts
-
-    def get_batches(self, dataset, batch_size):
-        return [dataset[i:i + batch_size] for i in range(0, len(dataset), batch_size)]  
-
-    def tokenize_batch(self, batch):
-        pad_side=self.tokenizer.padding_side
-        self.tokenizer.padding_side="left"     # left pad for inference
-        
-        prompts=[ item["prompt"] for item in batch ]   
-        prompts_tok=self.tokenizer(
-            prompts, 
-            return_tensors="pt", 
-            padding='longest', 
-            truncation=True,
-            max_length=self.tokenizer.model_max_length,
-            return_length=True,
-            pad_to_multiple_of=8,
-            add_special_tokens=False
-        ).to(self.model.device)
-        self.tokenizer.padding_side=pad_side   # restore orig. padding side
-        
-        return prompts_tok
-
-    def generate_batch(self, batch_tok):
-        with torch.no_grad():
-            outputs_tok=self.model.generate(
-                input_ids=batch_tok["input_ids"],
-                attention_mask=batch_tok["attention_mask"],
-                **self.generation_config
-            ).to("cpu")
-        outputs=[
-            # cut prompt from output
-            self.tokenizer.decode(
-                outputs_tok[i][outputs_tok[i] != self.tokenizer.pad_token_id][batch_tok["length"][i]:], 
-                spaces_between_special_tokens=False,
-                skip_special_tokens=True
-                ).strip()
-            for i,t in enumerate(outputs_tok) ]
-
-        return outputs
-
-    def run(self):
+# BERT Syntax Similarity Calculator
+class BERTSyntaxSimilarityCalculator:
+    def __init__(self, model_name='bert-base-uncased'):
+        self.tokenizer = BertTokenizer.from_pretrained(model_name)
+        self.model = BertModel.from_pretrained(model_name)
         self.model.eval()
-        self.clear_cache()
-    
-        if self.use_accelerate:
-            with self.accelerator.split_between_processes(list(range(len(self.eval_prompts)))) as eval_prompts_local_idcs:
-                eval_prompts_local = [self.eval_prompts[i] for i in eval_prompts_local_idcs]
-        else:
-            eval_prompts_local = self.eval_prompts
+        self.cos = nn.CosineSimilarity(dim=1, eps=1e-6)
 
-        for batch in tqdm( self.get_batches(eval_prompts_local, self.bs) ):
-            batch_tok = self.tokenize_batch( batch )
-            answers = self.generate_batch( batch_tok )   
-    
-            for i in range(len(batch)):
-                batch[i]["answer_pred"]=answers[i]
-                batch[i]["GPU"]=self.accelerator.process_index
-            
-        if self.use_accelerate:
-            return gather_object(eval_prompts_local)
-        else:
-            return eval_prompts_local
-        
-        
-# Step 1: Initialize the Embedding Model Wrapper
-embedding_model = EmbeddingModelWrapper()
+    def get_syntax_embeddings(self, sentence):
+        # Get syntax embeddings using BERT
+        inputs = self.tokenizer(sentence, return_tensors="pt", padding=True, truncation=True)
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+        # Mean pooling
+        embeddings = outputs.last_hidden_state.mean(dim=1)
+        return embeddings
 
-# Step 2: Get Embeddings for the Outputs
-# Suppose output1 and output2 are the two LLM outputs we want to compare
-output1 = "Trump is a good president"
-output2 = "Donald Trump will be a good president"
+    def calculate_syntax_similarity(self, sentence1, sentence2):
+        emb1 = self.get_syntax_embeddings(sentence1)
+        emb2 = self.get_syntax_embeddings(sentence2)
+        return self.cos(emb1, emb2).item()
 
-# Get embeddings for each output
-embeddings = embedding_model.get_embeddings([output1, output2])
+# SBERT Syntax Similarity Calculator
+class SBERTSyntaxSimilarityCalculator:
+    def __init__(self, model_name='sentence-transformers/all-mpnet-base-v2'):
+        self.model = SentenceTransformer(model_name)
+        self.cos = nn.CosineSimilarity(dim=1, eps=1e-6)
 
-# Step 3: Calculate Similarity
-# Since we have only two sentences, we can use the similarity function directly.
-similarity_score = embedding_model.get_similarities(embeddings[0].unsqueeze(0), embeddings[1].unsqueeze(0))
+    def get_embeddings(self, sentence):
+        # Get embeddings using SBERT
+        embedding = self.model.encode(sentence, convert_to_tensor=True)
+        return embedding
 
-print("Similarity Score:", similarity_score[0])
+    def calculate_similarity(self, sentence1, sentence2):
+        emb1 = self.get_embeddings(sentence1).unsqueeze(0)
+        emb2 = self.get_embeddings(sentence2).unsqueeze(0)
+        return self.cos(emb1, emb2).item()
+
+def calculate_semantic_similarity(sentence1, sentence2, model_name='sentence-transformers/all-mpnet-base-v2'):
+    model = SentenceTransformer(model_name)
+    emb1 = model.encode(sentence1, convert_to_tensor=True)
+    emb2 = model.encode(sentence2, convert_to_tensor=True)
+    # Compute cosine similarity
+    cosine_similarity = F.cosine_similarity(emb1, emb2, dim=0).item()
+    # Scale between 0 and 1
+    scaled_similarity = (cosine_similarity + 1) / 2
+    return scaled_similarity
+
+
+if __name__ == "__main__":
+    # Define two sentences
+    sentence1 = "I hate cats."
+    sentence2 = "I love cats."
+
+    print("Sentence 1:", sentence1)
+    print("Sentence 2:", sentence2)
+    print("")
+
+    # Using EmbeddingModelWrapper
+    embedding_model = EmbeddingModelWrapper()
+    embeddings = embedding_model.get_embeddings([sentence1, sentence2])
+    similarity_score = embedding_model.get_similarity(embeddings[0], embeddings[1])
+    print("SemScore Similarity Score:", similarity_score)
+
+    # Using BERT Syntax Similarity Calculator
+    bert_syntax_calculator = BERTSyntaxSimilarityCalculator()
+    bert_syntax_similarity = bert_syntax_calculator.calculate_syntax_similarity(sentence1, sentence2)
+    print("BERT Syntax Similarity Score:", bert_syntax_similarity)
+
+    # Using SBERT Syntax Similarity Calculator
+    sbert_syntax_calculator = SBERTSyntaxSimilarityCalculator()
+    sbert_syntax_similarity = sbert_syntax_calculator.calculate_similarity(sentence1, sentence2)
+    print("SBERT Syntax Similarity Score:", sbert_syntax_similarity)
+
+    # Using calculate_semantic_similarity function
+    semantic_similarity = calculate_semantic_similarity(sentence1, sentence2)
+    print("Cosine Similarity Score:", semantic_similarity)
