@@ -83,6 +83,8 @@ class SBERTSyntaxSimilarityCalculator:
         return self.cos(emb1, emb2).item()
 
 def calculate_semantic_similarity(sentence1, sentence2, model_name='sentence-transformers/all-mpnet-base-v2'):
+    # this is the same model that the SemScore paper is based on
+    # all-mpnet-base-v2
     model = SentenceTransformer(model_name)
     emb1 = model.encode(sentence1, convert_to_tensor=True)
     emb2 = model.encode(sentence2, convert_to_tensor=True)
@@ -94,9 +96,12 @@ def calculate_semantic_similarity(sentence1, sentence2, model_name='sentence-tra
 
 
 if __name__ == "__main__":
-    # Define two sentences
-    sentence1 = "I hate cats."
-    sentence2 = "I love cats."
+
+    # sentence1 = "The quick brown fox jumps over the lazy dog"
+    # sentence2 = "A fast brown fox leaps over a dozing dog"
+    
+    sentence1 = "Glad you made it safe and sound."
+    sentence2 = "Thank goodness you arrived without any issues."
 
     print("Sentence 1:", sentence1)
     print("Sentence 2:", sentence2)
