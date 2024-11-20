@@ -1,6 +1,6 @@
-from . import utils
-from . import anchor_base
-from . import anchor_explanation
+from anchor import utils
+from anchor import anchor_base
+from anchor import anchor_explanation
 import numpy as np
 import json
 import os
