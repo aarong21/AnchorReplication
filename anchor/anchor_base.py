@@ -302,6 +302,7 @@ class AnchorBaseBeam(object):
         best_of_size = {0: []}
         best_coverage = -1
         best_tuple = ()
+        best_tuples = []
         t = 1
         if max_anchor_size is None:
             max_anchor_size = n_features
@@ -357,9 +358,12 @@ class AnchorBaseBeam(object):
                 if verbose:
                     print('%s mean = %.2f lb = %.2f ub = %.2f coverage: %.2f n: %d' % (t, mean, lb, ub, coverage, state['t_nsamples'][t]))
                 if mean >= desired_confidence and lb > desired_confidence - epsilon_stop:
+                    with open('output.txt', 'w') as file:
+                        file.write("Hello, World!\n")  # Write a string to the file
                     if verbose:
                         print('Found eligible anchor ', t, 'Coverage:',
                               coverage, 'Is best?', coverage > best_coverage)
+                    best_tuples.append((t, coverage))
                     if coverage > best_coverage:
                         best_coverage = coverage
                         best_tuple = t
@@ -387,4 +391,4 @@ class AnchorBaseBeam(object):
                 1, verbose=verbose)
             best_tuple = tuples[chosen_tuples[0]]
         # return best_tuple, state
-        return AnchorBaseBeam.get_anchor_from_tuple(best_tuple, state)
+        return AnchorBaseBeam.get_anchor_from_tuple(best_tuple, state), [(AnchorBaseBeam.get_anchor_from_tuple(tup[0], state), tup[1]) for tup in best_tuples]
