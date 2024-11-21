@@ -1,0 +1,8 @@
+   [
+      
+      {"role": "user", "content": "Two quantum states with energies E1 and E2 have a lifetime of 10^-9 sec and 10^-8 sec, respectively. We want to clearly distinguish these two energy levels. Which one of the following options could be their energy difference so that they be clearly resolved? \nA) 10^-4 eV, \nB) 10^-11 eV, \nC) 10^-8 eV, \nD) 10^-9 eV"},
+      {"role": "user", "content": "trans-cinnamaldehyde was treated with methylmagnesium bromide, forming product 1. 1 was treated with pyridinium chlorochromate, forming product 2. 3 was treated with (dimethyl(oxo)-l6-sulfaneylidene)methane in DMSO at elevated temperature, forming product 3. how many carbon atoms are there in product 3? \nA) 10, \nB) 11, \nC) 12, \nD) 14"}
+   ]
+
+	
+  

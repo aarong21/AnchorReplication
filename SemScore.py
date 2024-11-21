@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel, BertTokenizer, BertModel
 from sentence_transformers import SentenceTransformer
 
+
 # Disable parallelism in tokenizers to prevent conflicts
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
