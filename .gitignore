@@ -1,14 +1,10 @@
-# Ignore .env file
 .env
 
-# Ignore Python bytecode files
 *.pyc
 __pycache__/
 
-# Ignore virtual environment directories
 .venv/
 env/
 
-# Ignore other sensitive files
 .DS_Store
 *.log
