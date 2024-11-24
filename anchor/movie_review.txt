@@ -1,23 +1,47 @@
-It's happened to just about anyone who spends at least part of their day on their phone: that peculiar moment when you open up a social media app and find yourself staring at a targeted ad for something you haven't shopped for or even searched for, but mentioned casually to a friend or partner. That's odd, you might think, and then (perhaps after ordering the item in question), you move on, choosing not to grapple with the implications of this transaction. It's just too chilling to consider that the phones are listening.
+Ever since I joined Letterboxd, nothing has scared me more than the idea of trying to write about 2001: A Space Odyssey. The fact that everything has "already been said" about this masterpiece has itself already been said so many times that there's not even an original means of expressing my lack of originality left at my disposal. So with the knowledge that I will probably never be able to fully encapsulate what makes this my favorite movie of all time—let alone say something truly unique about it—here is a small list of a few things I love about it.
 
+I love that the monolith has remained an enigmatic symbol capable of being read in any number of different ways regardless of its original intended purpose (if any).
 
-Yet the new HBO documentary "Surveilled" informs us that they are doing just that, and the consequences are far more dire than runaway online shopping. The directors are Matthew O'Neill and Perri Peltz; the producer and star is Ronan Farrow, who immersed himself in the world of digital spyware for the "New Yorker." The primary focus of his investigation was Pegasus, developed by the Israeli private commercial spyware company the NSO Group; they sell Pegasus primarily to governments, which in turn (per his reporting) use the software to target journalists, activists, dissidents, and politicians.
+I love that the film prioritizes symbolism and thematic development over traditional storytelling.
 
+I love the way the story is broken up into four distinct acts, giving it a solid structure to communicate its complex ideas.
 
+I love the "tone poem" quality of the soundtrack, from the ominous choral nightmares of Requiem and Lux Aeterna to the final celebratory fanfare of Also Sprach Zarathustra.
 
-"It's very powerful," a former NSO Group employee tells Farrow. "It's very intrusive." Put simply, Pegasus can infect a user's smartphone, accessing its apps—yes, even the encrypted ones—to exfiltrate GPS information, contacts, private photos, and any other data they desire. It can turn on the target's camera and/or microphone, recording audio or video without your permission, or even your knowledge. "The bleeding edge of surveillance is these digital tools," Farrow explains, "and they are getting way more powerful."
+I love that Kubrick hired mimes to perform as the monkeys, giving them incredibly unique and memorable physical performances.
 
+I love the match cut from the technology of the bone hammer to the technology of the space ship across more than four million years.
 
-Farrow's investigation is exhaustive, spanning two years and several continents. He travels to Tel Aviv, taking his cameras into the NSO Group headquarters, where he voices his sensible moral concerns to various spokespeople, who give him carefully-prepared responses about "all the good work" that they do. He gets more useful information from that former employee, who left the company (along with many others) after the 2018 murder of Saudi dissident journalist Jamal Khashoggi—an ambush made possible by Pegasus software. In a phone call captured by the documentary crew, Farrow's contact at NSO asks him to share which of their former employees he spoke with. (He, of course, protects his source.) 
+I love the model work, which gives us the most beautifully detailed space ships we've seen in any movie ever, practical or digital.
 
+I love how elegant and balletic the space station docking is with the synchronized rotation of the ship and The Blue Danube playing in the background.
 
-At least 45 countries use Pegasus, we're told, and it's not just autocrats and dictators;  Western democracies are using spyware too, most of them under a veil of secrecy. "We live in a time where there's obvious, well-documented democratic backsliding," explains Ron Deibert of the Citizen Lab in Toronto, which is doing much of the investigation and exposure of this technology. "Authoritarian practices are spreading worldwide. I firmly believe the surveillance industry, unchecked as it is, is one of the major contributing factors to those trends." 
+I love how beautiful all the photography is, but the Moon landing in particular stands out for me with its beautiful red lighting.
 
-And this is the structural masterstroke of "Surveilled," because Farrow and directors O'Neill and Peltz understand that it's one thing for us to shake our heads at the targeting of journalists and activists in the UAE or even in Spain, but when the threat becomes a direct one to the viewer, as it does in the last 20 minutes or so, we sit upright. It's not just that employees of the United States government working abroad have been hacked by Pegasus; the NSO group pitched law enforcement agencies on a Pegasus-like software before the company was placed on an export blacklist in 2021, and many such agencies were unsurprisingly receptive to the idea. In March of 2023, the Biden administration issued an executive order prohibiting government agencies from purchasing foreign spyware, "but it's not a blanket ban on the purchase of all spyware," Farrow explains, noting that mere days later, we joined several other countries in a joint statement vowing to explore the use of this technology — but responsibly. 
+I love that Dr. Floyd flies to Clavius Base on a nearly empty flight, communicating the idea that space travel has become a commonplace through simple staging.
 
-Farrow talks to U.S. Congressman Jim Himes, who insists that they must "do the hard work of assuring that law enforcement uses it consistent with our civil liberties." Who on earth trusts them to do that? Nathaniel Fick, the State Department's ambassador-at-large for its cybersecurity division, tells Farrow that "the United States uses every tool of national power in pursuit of interests, grounded in our values," and if that sounds like buzzword salad to you, you're not alone. 
+I love that in the future sandwiches come with the crusts cut off.
 
-Farrow is an ideal centerpiece presence for "Surveilled," because he's both a good reporter and a crisp communicator. He uses purposefully scary language, not just to scare us (though he does), but for maximum clarity. This is a complicated story, clouded by technical jargon and talking points about bad criminals and terrorist activity, and a phrase like "the most advanced spyware can turn your phone into a spy in your pocket" cuts right through it. O'Neill and Peltz also make some documentary hay out of the practical details of an investigation like this; he's not allowed to film his interview with NSO's CEO, for example, so they film him debriefing his New Yorker editor about that interview. 
+I love that the astronauts get together for a picture in front of the monolith, as if it's just another vacation spot to take your kids.
 
+I love HAL and his creepy close ups.
 
-Farrow is perhaps a bit too front-and-center—it feels, in spots, like he's the focus nearly as much as the story itself—but hey, if you have one of the last remaining celebrity journalists, it probably makes sense to use him as such. His heavy presence and the brisk running time (just an hour) make "Surveilled" feel less like a documentary than a "Frontline" episode, albeit a well-made and deeply frightening one, whose conclusions are inescapably grim. "We can't put the technology genie back in the bottle," Ambassador Fick tells Farrow. "Once they're out in the world, any nefarious use that we can imagine, we're probably going to see." In his final voice-over, Farrow shrugs, "The only path to privacy might be living without our phones," a deduction I could only receive with a grim snort; in order to watch the advance screener of the report he was concluding, I had to install a verification app on my phone. 
+I love Dave and his sketches of the sleeping crew.
+
+I love Frank and his doomed game of chess with HAL.
+
+I love how disorienting all the camera angles are of the Discovery One while Dave and Frank watch the BBC interview.
+
+I love the reflected lights in Dave's space helmet.
+
+I love the fast-cut shots of HAL when he takes control of Frank's pod.
+
+I love the way HAL refuses to open the pod bay doors.
+
+I love the "Beyond the Infinite" sequence with its gorgeous slit-scan photography and the haunting inserts of Dave's mental breakdown.
+
+I love the Louis XVI bedroom and the way Dave sees himself aging and the way the camera passes off perspectives between the different Daves by having them see each other and then mysteriously disappear.
+
+I love the triumphant star child finale.
+
+I love 2001: A Space Odyssey. It is my perfect movie.

@@ -176,7 +176,7 @@ class AnchorText(object):
         # print words, true_label
         exp, exps = anchor_base.AnchorBaseBeam.anchor_beam(
             sample_fn, delta=delta, epsilon=tau, batch_size=batch_size,
-            desired_confidence=threshold, stop_on_first=True,
+            desired_confidence=threshold, beam_size=5, stop_on_first=True,
             coverage_samples=1, **kwargs)
         exp['names'] = [words[x] for x in exp['feature']]
         exp['positions'] = [positions[x] for x in exp['feature']]

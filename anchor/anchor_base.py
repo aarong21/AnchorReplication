@@ -274,7 +274,7 @@ class AnchorBaseBeam(object):
         if lb > desired_confidence:
             anchor['num_preds'] = data.shape[0]
             anchor['all_precision'] = mean
-            return anchor
+            return anchor, [(anchor, 0)]
         prealloc_size = batch_size * 10000
         current_idx = data.shape[0]
         data = np.vstack((data, np.zeros((prealloc_size, data.shape[1]),
@@ -306,11 +306,12 @@ class AnchorBaseBeam(object):
         t = 1
         if max_anchor_size is None:
             max_anchor_size = n_features
+        num_anchors = 0
         while current_size <= max_anchor_size:
             tuples = AnchorBaseBeam.make_tuples(
                 best_of_size[current_size - 1], state)
-            tuples = [x for x in tuples
-                      if state['t_coverage'][x] > best_coverage]
+            # tuples = [x for x in tuples
+            #           if state['t_coverage'][x] > best_coverage]
             if len(tuples) == 0:
                 break
             sample_fns = AnchorBaseBeam.get_sample_fns(sample_fn, tuples,
@@ -358,8 +359,9 @@ class AnchorBaseBeam(object):
                 if verbose:
                     print('%s mean = %.2f lb = %.2f ub = %.2f coverage: %.2f n: %d' % (t, mean, lb, ub, coverage, state['t_nsamples'][t]))
                 if mean >= desired_confidence and lb > desired_confidence - epsilon_stop:
+                    num_anchors += 1
                     with open('output.txt', 'w') as file:
-                        file.write("Hello, World!\n")  # Write a string to the file
+                        file.write(f"{num_anchors}")  # Write a string to the file
                     if verbose:
                         print('Found eligible anchor ', t, 'Coverage:',
                               coverage, 'Is best?', coverage > best_coverage)
@@ -370,7 +372,8 @@ class AnchorBaseBeam(object):
                         if best_coverage == 1 or stop_on_first:
                             stop_this = True
             if stop_this:
-                break
+                pass
+                # break
             current_size += 1
         if best_tuple == ():
             # Could not find an anchor, will now choose the highest precision
