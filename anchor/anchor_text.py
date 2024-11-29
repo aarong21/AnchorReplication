@@ -85,13 +85,16 @@ class SentencePerturber:
     def probs(self, s):
         if s not in self.cache:
             r = self.tg.unmask(s)
+            with open('output.txt', 'w') as file:
+                file.write(f"finished cache \n")  # Write a string to the file
+                file.write(f"{s}")
             self.cache[s] = [(a, exp_normalize(b)) for a, b in r]
             if not self.onepass:
                 self.cache[s] = self.cache[s][:1]
         return self.cache[s]
 
 
-    def perturb_sentence(present, n, prob_change=0.5):
+    def perturb_sentence(self,present, n, prob_change=0.5):
         raw = np.zeros((n, len(self.words)), '|U80')
         data = np.ones((n, len(self.words)))
 
