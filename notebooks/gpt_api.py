@@ -7,13 +7,29 @@ import json
 load_dotenv(find_dotenv())
 
 # Set OpenAI API key
-openai.api_key = os.environ.get('OPENAI_API_KEY')
+# openai.api_key = os.environ.get('OPENAI_API_KEY')
+
+client = openai.OpenAI(api_key=os.environ.get('OPEN_AI_API_KEY'))
 
 # Create a model
 model = "gpt-4o"
 temperature = 0.3  # Makes the model more deterministic and less random
 MAX_TOKENS = 500
 topic = ""
+
+def run_model(prompt, model):
+  completion = client.chat.completions.create(
+      model=model,
+      messages=[
+          {"role": "system", "content": "You are a helpful assistant. Return only a single character 'A', 'B', 'C', or 'D' corresponding to the answer you find."},
+          {
+              "role": "user",
+              "content": prompt
+          }
+      ]
+  )
+
+  return completion.choices[0].message.content
 
 
 # this is for multiple prompts  NOT NEEDED

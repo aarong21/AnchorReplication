@@ -17,9 +17,9 @@ temperature = 0.3  # Makes the model more deterministic and less random
 MAX_TOKENS = 500
 topic = ""
 
-def run_model(prompt):
+def run_model(prompt, model):
   completion = client.chat.completions.create(
-      model="gpt-4o",
+      model=model,
       messages=[
           {"role": "system", "content": "You are a helpful assistant. Return only a single character 'A', 'B', 'C', or 'D' corresponding to the answer you find."},
           {
