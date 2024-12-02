@@ -310,8 +310,8 @@ class AnchorBaseBeam(object):
         while current_size <= max_anchor_size:
             tuples = AnchorBaseBeam.make_tuples(
                 best_of_size[current_size - 1], state)
-            # tuples = [x for x in tuples
-            #           if state['t_coverage'][x] > best_coverage]
+            tuples = [x for x in tuples
+                      if state['t_coverage'][x] > best_coverage]
             if len(tuples) == 0:
                 break
             sample_fns = AnchorBaseBeam.get_sample_fns(sample_fn, tuples,
