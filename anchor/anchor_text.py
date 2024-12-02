@@ -177,7 +177,7 @@ class AnchorText(object):
         words, positions, true_label, sample_fn = self.get_sample_fn(
             text, classifier_fn, onepass=onepass, use_proba=use_proba)
         # print words, true_label
-        exp, exps = anchor_base.AnchorBaseBeam.anchor_beam(
+        exp, exps, non_exps = anchor_base.AnchorBaseBeam.anchor_beam(
             sample_fn, delta=delta, epsilon=tau, batch_size=batch_size,
             desired_confidence=threshold, beam_size=5, stop_on_first=True,
             coverage_samples=1, **kwargs)
@@ -196,7 +196,16 @@ class AnchorText(object):
             expl['prediction'] = true_label
             final_explanations.append(anchor_explanation.AnchorExplanation('text', expl,
                                                             self.as_html))
-        return explanation, final_explanations
+        sorted_non_exps = sorted(non_exps, key=lambda x: x[1])
+        final_explanations = []
+        for expl, cov in sorted_non_exps:
+            expl['names'] = [words[x] for x in expl['feature']]
+            expl['positions'] = [positions[x] for x in expl['feature']]
+            expl['instance'] = text
+            expl['prediction'] = true_label
+            final_non_explanations.append(anchor_explanation.AnchorExplanation('text', expl,
+                                                            self.as_html))
+        return explanation, final_explanations, final_non_explanations
 
     def as_html(self, exp):
         predict_proba = np.zeros(len(self.class_names))
