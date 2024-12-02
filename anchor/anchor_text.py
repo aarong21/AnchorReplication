@@ -197,7 +197,7 @@ class AnchorText(object):
             final_explanations.append(anchor_explanation.AnchorExplanation('text', expl,
                                                             self.as_html))
         sorted_non_exps = sorted(non_exps, key=lambda x: x[1])
-        final_explanations = []
+        final_non_explanations = []
         for expl, cov in sorted_non_exps:
             expl['names'] = [words[x] for x in expl['feature']]
             expl['positions'] = [positions[x] for x in expl['feature']]
