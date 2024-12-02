@@ -303,6 +303,7 @@ class AnchorBaseBeam(object):
         best_coverage = -1
         best_tuple = ()
         best_tuples = []
+        non_anch_tuples = []
         t = 1
         if max_anchor_size is None:
             max_anchor_size = n_features
@@ -371,6 +372,8 @@ class AnchorBaseBeam(object):
                         best_tuple = t
                         if best_coverage == 1 or stop_on_first:
                             stop_this = True
+                else:
+                    non_anch_tuples.append((t, coverage))
             if stop_this:
                 pass
                 # break
@@ -394,4 +397,4 @@ class AnchorBaseBeam(object):
                 1, verbose=verbose)
             best_tuple = tuples[chosen_tuples[0]]
         # return best_tuple, state
-        return AnchorBaseBeam.get_anchor_from_tuple(best_tuple, state), [(AnchorBaseBeam.get_anchor_from_tuple(tup[0], state), tup[1]) for tup in best_tuples]
+        return AnchorBaseBeam.get_anchor_from_tuple(best_tuple, state), [(AnchorBaseBeam.get_anchor_from_tuple(tup[0], state), tup[1]) for tup in best_tuples], [(AnchorBaseBeam.get_anchor_from_tuple(tup[0], state), tup[1]) for tup in non_anch_tuples]
